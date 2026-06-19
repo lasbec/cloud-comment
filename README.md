@@ -28,6 +28,7 @@ Technologies:
 - vite-plugin-pwa
 - Web App Manifest
 - Service Worker
+- tailwind as CSS Tooling
 
 ### Editor Web Component
 
