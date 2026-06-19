@@ -49,3 +49,18 @@ Technologies:
  - Zig
  - Docker
  - SQLite
+## Build und Deployment
+
+Das Frontend wird mit npm gebaut. Für ein lokales Produktions-Build:
+
+```sh
+npm install
+npm run build
+```
+
+Das Deployment ist als Docker-Image vorgesehen. Das Image baut zuerst das Vite-Frontend, kompiliert anschließend den Zig-Backend-Proxy und startet den Container auf Port `8080`:
+
+```sh
+docker build -t cloud-comment .
+docker run --rm -p 8080:8080 cloud-comment
+```
