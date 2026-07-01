@@ -7,8 +7,24 @@ COPY public ./public
 COPY src/frontend ./src/frontend
 RUN npm run build
 
-FROM ziglang/zig:0.13.0 AS backend
+FROM debian:bookworm-slim AS backend
 WORKDIR /app
+ARG TARGETARCH
+ARG ZIG_VERSION=0.13.0
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && TARGETARCH="${TARGETARCH:-$(dpkg --print-architecture)}" \
+    && case "${TARGETARCH}" in \
+        amd64) ZIG_ARCH="x86_64" ;; \
+        arm64) ZIG_ARCH="aarch64" ;; \
+        *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac \
+    && curl -fsSL "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz" -o /tmp/zig.tar.xz \
+    && mkdir -p /opt/zig \
+    && tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 \
+    && rm /tmp/zig.tar.xz
+ENV PATH="/opt/zig:${PATH}"
 COPY build.zig ./
 COPY src/backend ./src/backend
 RUN zig build -Doptimize=ReleaseSafe
